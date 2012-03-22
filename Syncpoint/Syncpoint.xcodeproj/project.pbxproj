@@ -539,6 +539,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# Source: <https://github.com/jverkoey/iOS-Framework>\n\nset -e\n\nmkdir -p \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.framework/Versions/A\"\nmkdir -p \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.framework/Versions/A/Headers\"\n\n# Link the \"Current\" version to \"A\"\nln -sfh A \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.framework/Versions/Current\"\nln -sfh Versions/Current/Headers \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.framework/Headers\"\nln -sfh \"Versions/Current/${PRODUCT_NAME}\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.framework/${PRODUCT_NAME}\"\n\n# The -a ensures that the headers maintain the source modification date so that we don't constantly\n# cause propagating rebuilds of files that import these headers.\ncp -a \"${TARGET_BUILD_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}/\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.framework/Versions/A/Headers\"\n";
+			showEnvVarsInLog = 0;
 		};
 		27EDEA5D1513F6840060EDB9 /* Create Fat Library */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -568,6 +569,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\ncp \"${BUILT_PRODUCTS_DIR}/CouchCocoa/\"*.h \"${BUILT_PRODUCTS_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}\"\n";
+			showEnvVarsInLog = 0;
 		};
 		27EDEA5F1514083B0060EDB9 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -808,7 +810,6 @@
 					"\"$(SRCROOT)/../build/Syncpoint/Build/Products/Debug\"",
 					"\"$(SRCROOT)/../build/Syncpoint/Build/Products/Debug-iphonesimulator\"",
 				);
-				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = Syncpoint;
 				PUBLIC_HEADERS_FOLDER_PATH = Headers;
 				SDKROOT = iphoneos;
@@ -838,7 +839,6 @@
 					"\"$(SRCROOT)/../build/Syncpoint/Build/Products/Debug\"",
 					"\"$(SRCROOT)/../build/Syncpoint/Build/Products/Debug-iphonesimulator\"",
 				);
-				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = Syncpoint;
 				PUBLIC_HEADERS_FOLDER_PATH = Headers;
 				SDKROOT = iphoneos;

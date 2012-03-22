@@ -18,8 +18,7 @@
 #import <Syncpoint/Syncpoint.h>
 
 
-#define kServerURLString @"http://single.couchbase.net/"
-//#define kServerURLString @"http://localhost:5984/"
+#define kServerURLString @"http://localhost:5984/"
 
 #define kSyncpointAppId @"demo-app"
 
@@ -38,7 +37,7 @@
 	[window makeKeyAndVisible];
     
     //gRESTLogLevel = kRESTLogRequestHeaders;
-    gCouchLogLevel = 1;
+    //gCouchLogLevel = 1;
     
     NSLog(@"Creating database...");
     CouchTouchDBServer* server = [CouchTouchDBServer sharedInstance];

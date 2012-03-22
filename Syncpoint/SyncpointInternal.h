@@ -40,6 +40,8 @@
 /** The name of the remote database that the local control database syncs with. */
 @property (readonly) NSString* control_database;
 
+- (void) didSyncControlDB;
+
 - (BOOL) clearState: (NSError**)outError;
 
 @end

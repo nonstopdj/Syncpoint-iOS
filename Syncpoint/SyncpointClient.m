@@ -240,6 +240,8 @@ authenticatedWithToken: (id)accessToken
         _controlPull.continuous = YES;
         self.state = kSyncpointReady;
         LogTo(Syncpoint, @"**READY**");
+        
+        [_session didSyncControlDB];
 
         [self getUpToDateWithSubscriptions];
     }

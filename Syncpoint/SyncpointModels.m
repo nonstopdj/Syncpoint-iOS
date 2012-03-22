@@ -71,6 +71,7 @@ static NSEnumerator* modelsOfType(CouchDatabase* database, NSString* type) {
 
 @implementation SyncpointSession
 {
+    bool _controlDBSynced;
     NSMutableArray* _toBeInstalled;
 }
 
@@ -185,7 +186,7 @@ static NSEnumerator* modelsOfType(CouchDatabase* database, NSString* type) {
                                          error: (NSError**)outError
 {
     LogTo(Syncpoint, @"Install channel named '%@' to %@", channelName, localDatabase);
-    if (self.isActive) {
+    if (self.isActive && _controlDBSynced) {
         SyncpointChannel* channel = [self channelWithName: channelName];
         if (!channel)
             channel = [self makeChannelWithName: channelName error: outError];
@@ -202,19 +203,31 @@ static NSEnumerator* modelsOfType(CouchDatabase* database, NSString* type) {
 }
 
 
-- (void) didLoadFromDocument {
-    [super didLoadFromDocument];
-    
-    if (_toBeInstalled && self.isActive) {
+- (void) doPendingInstalls {
+    if (_toBeInstalled && self.isActive && _controlDBSynced) {
         LogTo(Syncpoint, @"Installing %u pending channels...", _toBeInstalled.count);
         NSMutableArray* toInstall = _toBeInstalled;
         _toBeInstalled = nil;
         for (NSArray* info in toInstall) {
-             [self installChannelNamed: [info objectAtIndex: 0]
-                            toDatabase: [info objectAtIndex: 1]
-                                 error: nil];
+            [self installChannelNamed: [info objectAtIndex: 0]
+                           toDatabase: [info objectAtIndex: 1]
+                                error: nil];
         }
     }
+}
+
+
+- (void) didSyncControlDB {
+    if( !_controlDBSynced) {
+        _controlDBSynced = YES;
+        [self doPendingInstalls];
+    }
+}
+
+
+- (void) didLoadFromDocument {
+    [super didLoadFromDocument];
+    [self doPendingInstalls];
 }
 
 

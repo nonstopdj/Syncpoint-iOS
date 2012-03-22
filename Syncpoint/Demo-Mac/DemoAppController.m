@@ -29,7 +29,6 @@ static TDListener* sListener;
 #endif
 
 
-//#define kServerURLString @"http://single.couchbase.net/"
 #define kServerURLString @"http://localhost:5984/"
 
 #define kSyncpointAppId @"demo-app"
