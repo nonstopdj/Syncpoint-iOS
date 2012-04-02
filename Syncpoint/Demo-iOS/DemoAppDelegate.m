@@ -76,10 +76,10 @@
         [self showAlert: @"Couldn't subscribe to channel" error: error fatal: NO];
     }
 
-    if (syncpoint.state == kSyncpointUnauthenticated) {
-//        we aren't authed yet, activate the "Pair" button
-        
-    }
+//    if (syncpoint.state == kSyncpointUnauthenticated) {
+////        we aren't authed yet, try to auth (maybe our sesison was activated since we last quit)
+//        
+//    }
 
     return YES;
 }

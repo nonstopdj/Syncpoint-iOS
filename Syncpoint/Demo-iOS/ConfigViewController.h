@@ -11,11 +11,8 @@
 
 @interface ConfigViewController : UIViewController
 
-@property (weak, nonatomic, readonly) IBOutlet UITextField* urlField;
-@property (weak, nonatomic, readonly) IBOutlet UILabel* versionField;
-@property (weak, nonatomic, readonly) IBOutlet UISwitch* autoSyncSwitch;
-
-- (IBAction) learnMore:(id)sender;
+@property (weak, nonatomic, readonly) IBOutlet UILabel* sessionInfo;
+@property (weak, nonatomic, readonly) IBOutlet UILabel* sessionLabel;
 - (IBAction)done:(id)sender;
 
 @end

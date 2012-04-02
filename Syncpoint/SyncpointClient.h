@@ -34,6 +34,8 @@ typedef enum {
                      appId: (NSString*)syncpointAppId
                      error: (NSError**)error;
 
+- (void) createSessionWithType: (NSString*)sessionType andToken: (NSString*)sessionToken;
+
 @property (readonly, nonatomic) CouchServer* localServer;
 
 /** The id used to relate the client code to the server storage. */
