@@ -59,7 +59,7 @@
 
     // Start up Syncpoint client:
     NSURL* remote = [NSURL URLWithString: kServerURLString];
-    [SyncpointFacebookAuth setFacebookAppID: @"251541441584833"];
+
     self.syncpoint = [[SyncpointClient alloc] initWithLocalServer: server
                                                remoteServer: remote
                                                       appId: kSyncpointAppId
@@ -76,18 +76,13 @@
         [self showAlert: @"Couldn't subscribe to channel" error: error fatal: NO];
     }
 
-    if (syncpoint.state == kSyncpointUnauthenticated)
-        [syncpoint authenticate: [SyncpointFacebookAuth new]];
+    if (syncpoint.state == kSyncpointUnauthenticated) {
+//        we aren't authed yet, activate the "Pair" button
+        
+    }
 
     return YES;
 }
-
-
-- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
-    NSAssert(syncpoint, @"Syncpoint not created yet");
-    return [syncpoint handleOpenURL: url];
-}
-
 
 
 // Display an error alert, without blocking.

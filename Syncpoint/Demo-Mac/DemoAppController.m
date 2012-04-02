@@ -108,7 +108,6 @@ int main (int argc, const char * argv[]) {
     // Start up Syncpoint client:
     NSError* error;
     NSURL* remote = [NSURL URLWithString: kServerURLString];
-    [SyncpointFacebookAuth setFacebookAppID: @"251541441584833"];
     _syncpoint = [[SyncpointClient alloc] initWithLocalServer: server
                                                remoteServer: remote
                                                         appId:kSyncpointAppId
@@ -119,8 +118,8 @@ int main (int argc, const char * argv[]) {
     }
     [_syncpoint addObserver: self forKeyPath: @"state"
                     options: NSKeyValueObservingOptionOld context: NULL];
-    if (_syncpoint.state == kSyncpointUnauthenticated)
-        [_syncpoint authenticate: [SyncpointFacebookAuth new]];
+//    if (_syncpoint.state == kSyncpointUnauthenticated){
+//    }
     
     [self observeSync];
     

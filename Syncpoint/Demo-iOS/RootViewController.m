@@ -270,6 +270,9 @@
 
 - (IBAction) configureSync:(id)sender {
     // TODO: Re-implement config UI for Syncpoint
+    UINavigationController* navController = (UINavigationController*)self.parentViewController;
+    ConfigViewController* controller = [[ConfigViewController alloc] init];
+    [navController pushViewController: controller animated: YES];
 }
 
 

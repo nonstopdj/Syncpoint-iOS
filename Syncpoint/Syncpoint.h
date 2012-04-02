@@ -10,5 +10,3 @@
 
 #import <Syncpoint/SyncpointClient.h>
 #import <Syncpoint/SyncpointModels.h>
-#import <Syncpoint/SyncpointAuthenticator.h>
-#import <Syncpoint/SyncpointFacebookAuth.h>
