@@ -7,7 +7,6 @@
 //
 
 #import "SyncpointClient.h"
-#import "SyncpointAuthenticator.h"
 #import "SyncpointModels.h"
 #import "SyncpointInternal.h"
 #import "CouchCocoa.h"
@@ -33,7 +32,6 @@
     SyncpointSession* _session;
     CouchReplication *_controlPull;
     CouchReplication *_controlPush;
-    SyncpointAuthenticator* _authenticator;
     BOOL _observingControlPull;
     SyncpointState _state;
 }
@@ -84,7 +82,6 @@
 
 
 - (void)dealloc {
-    _authenticator.syncpoint = nil;
     [self stopObservingControlPull];
     [[NSNotificationCenter defaultCenter] removeObserver: self];
 }
@@ -94,54 +91,17 @@
     return _state > kSyncpointActivating;
 }
 
-
-#pragma mark - AUTHENTICATION:
-
-
-- (void) authenticate: (SyncpointAuthenticator*)authenticator {
-    LogTo(Syncpoint, @"Authenticating using %@...", authenticator);
-    self.state = kSyncpointAuthenticating;
-    _authenticator = authenticator;
-    authenticator.syncpoint = self;
-    [authenticator initiatePairing];
-}
-
-
-- (BOOL) handleOpenURL: (NSURL*)url {
-    return [_authenticator handleOpenURL: url];
-}
-
-
-- (void) authenticator: (SyncpointAuthenticator*)authenticator
-authenticatedWithToken: (id)accessToken
-                ofType: (NSString*)tokenType
-{
-    if (authenticator != _authenticator || _session.isActive)
-        return;
-    
-    LogTo(Syncpoint, @"Authenticated! %@=\"%@\"", tokenType, accessToken);
+- (void) createSessionWithType: (NSString*)sessionType andToken: (NSString*)sessionToken {
+    if (_session.isActive) return;
     _session = [SyncpointSession makeSessionInDatabase: _localControlDatabase
-                                              withType: authenticator.authDocType
-                                             tokenType: tokenType
-                                                 token: accessToken
+                                              withType: sessionType
+                                                 token: sessionToken
                                                  appId: _appId
                                                  error: nil];   // TOD: Report error
-    _authenticator = nil;
     if (_session)
         [self activateSession];
     else
         self.state = kSyncpointUnauthenticated;
-}
-
-
-- (void) authenticator: (SyncpointAuthenticator*)authenticator
-       failedWithError: (NSError*)error
-{
-    if (authenticator != _authenticator || _session.isActive)
-        return;
-    LogTo(Syncpoint, @"Authentication failed or canceled");
-    _authenticator = nil;
-    self.state = kSyncpointUnauthenticated;
 }
 
 

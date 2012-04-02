@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-@class SyncpointAuthenticator, CouchServer, SyncpointSession, SyncpointInstallation;
+@class CouchServer, SyncpointSession, SyncpointInstallation;
 
 
 typedef enum {
@@ -34,6 +34,8 @@ typedef enum {
                      appId: (NSString*)syncpointAppId
                      error: (NSError**)error;
 
+- (void) createSessionWithType: (NSString*)sessionType andToken: (NSString*)sessionToken;
+
 @property (readonly, nonatomic) CouchServer* localServer;
 
 /** The id used to relate the client code to the server storage. */
@@ -42,24 +44,8 @@ typedef enum {
 /** Current state (see SyncpointState enum above). Observable. */
 @property (readonly, nonatomic) SyncpointState state;
 
-/** Begins the process of authentication and provisioning an app database. */
-- (void) authenticate: (SyncpointAuthenticator*)authenticator;
-
-
 /** The session object, which manages channels and subscriptions. */
 @property (readonly) SyncpointSession* session;
 
-/** Call this from your app delegate's -application:handleOpenURL: method.
-    @return  YES if Syncpoint's authenticator handled the URL, else NO. */
-- (BOOL) handleOpenURL: (NSURL*)url;
-
-
-
-/** Should be called only by the authenticator. */
-- (void) authenticator: (SyncpointAuthenticator*)authenticator
-authenticatedWithToken: (id)accessToken
-                ofType: (NSString*)tokenType;
-- (void) authenticator: (SyncpointAuthenticator*)authenticator
-       failedWithError: (NSError*)error;
 
 @end
