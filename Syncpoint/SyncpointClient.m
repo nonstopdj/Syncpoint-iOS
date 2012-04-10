@@ -119,10 +119,16 @@
 }
 
 - (void) pairingDidComplete: (CouchDocument*)userDoc {
-//    make session active before deleting doc
     NSMutableDictionary* props = [[userDoc properties] mutableCopy];
-    [props setObject:[NSNumber numberWithBool:YES] forKey:@"_deleted"];
-    [[userDoc currentRevision] putProperties: props];
+
+    [_session setValue:@"active" forKey:@"state"];
+    [_session setValue:[props valueForKey:@"control_database"] ofProperty:@"control_database"];
+    RESTOperation* op = [_session save];
+    [op onCompletion:^{
+        LogTo(Syncpoint, @"Session is now active! %@", op.dump);
+        [props setObject:[NSNumber numberWithBool:YES] forKey:@"_deleted"];
+        [[userDoc currentRevision] putProperties: props];
+    }];
 }
 
 - (void) waitForPairingToComplete: (CouchDocument*)userDoc {

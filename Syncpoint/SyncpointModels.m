@@ -151,6 +151,10 @@ static NSEnumerator* modelsOfType(CouchDatabase* database, NSString* type) {
     return $dict({@"_id", $sprintf(@"org.couchdb.user:%@", username)},
                  {@"name", username},
                  {@"type", @"user"},
+                 {@"sp_oauth",self.oauth_creds},
+                 {@"state", @"new"},
+                 {@"pairing-type",[self getValueOfProperty:@"type"]},
+                 {@"pairing-token",[self getValueOfProperty:@"session_token"]},
                  {@"roles", [NSArray array]},
                  {@"password", password});
 }
