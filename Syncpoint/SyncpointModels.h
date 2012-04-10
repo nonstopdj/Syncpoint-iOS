@@ -47,6 +47,8 @@
                                     toDatabase: (CouchDatabase*)localDatabase
                                          error: (NSError**)error;
 
+- (NSDictionary*) pairingUserProperties;
+
 /** Enumerates all channels of this session that are in the "ready" state. */
 @property (readonly) NSEnumerator* readyChannels;
 

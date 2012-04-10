@@ -34,6 +34,7 @@
                                       error: (NSError**)outError;
 
 @property (readwrite) NSDictionary* oauth_creds;
+@property (readwrite) NSDictionary* pairing_creds;
 
 /** The name of the remote database that the local control database syncs with. */
 @property (readonly) NSString* control_database;

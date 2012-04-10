@@ -75,7 +75,7 @@ static NSEnumerator* modelsOfType(CouchDatabase* database, NSString* type) {
     NSMutableArray* _toBeInstalled;
 }
 
-@dynamic user_id, oauth_creds, control_database;
+@dynamic user_id, oauth_creds, pairing_creds, control_database;
 
 
 + (SyncpointSession*) sessionInDatabase: (CouchDatabase *)database {
@@ -111,6 +111,10 @@ static NSEnumerator* modelsOfType(CouchDatabase* database, NSString* type) {
                                       {@"token_secret", randomString()},
                                       {@"token", randomString()});
     session.oauth_creds = oauth_creds;
+
+    NSDictionary* pairingCreds = $dict({@"username", randomString()},
+                                  {@"password", randomString()});
+    session.pairing_creds = pairingCreds;
     
     if (![[session save] wait: outError]) {
         Warn(@"SyncpointSession: Couldn't save new session");
@@ -138,6 +142,18 @@ static NSEnumerator* modelsOfType(CouchDatabase* database, NSString* type) {
     return self;
 }
 
+- (NSDictionary*) pairingUserProperties {
+    NSString* username = [self.pairing_creds objectForKey:@"username"];
+    NSString* password = [self.pairing_creds objectForKey:@"password"];
+    NSAssert(username, @"needs the pairing username set first");
+    NSAssert(password, @"needs the pairing password set first");
+    
+    return $dict({@"_id", $sprintf(@"org.couchdb.user:%@", username)},
+                 {@"name", username},
+                 {@"type", @"user"},
+                 {@"roles", [NSArray array]},
+                 {@"password", password});
+}
 
 - (NSError*) error {
     if (![self.state isEqual: @"error"])

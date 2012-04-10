@@ -11,6 +11,7 @@
 #import "SyncpointInternal.h"
 #import "CouchCocoa.h"
 #import "TDMisc.h"
+#import "MYBlockUtils.h"
 
 
 #define kLocalControlDatabaseName @"sp_control"
@@ -63,14 +64,13 @@
             if (_session.isActive) {
                 LogTo(Syncpoint, @"Session is active");
                 [self connectToControlDB];
-                [self observeControlDatabase];
             } else if (nil != _session.error) {
                 LogTo(Syncpoint, @"Session has error: %@", _session.error.localizedDescription);
                 _state = kSyncpointHasError;
-                [self activateSession];
+                [self pairSession];
             } else {
                 LogTo(Syncpoint, @"Session is not active");
-                [self activateSession];
+                [self pairSession];
             }
         } else {
             LogTo(Syncpoint, @"No session -- authentication needed");
@@ -97,9 +97,9 @@
                                               withType: sessionType
                                                  token: sessionToken
                                                  appId: _appId
-                                                 error: nil];   // TOD: Report error
+                                                 error: nil];   // TODO: Report error
     if (_session)
-        [self activateSession];
+        [self pairSession];
     else
         self.state = kSyncpointUnauthenticated;
 }
@@ -118,23 +118,61 @@
     return [_localControlDatabase pushToDatabaseAtURL: url];
 }
 
+- (void) pairingDidComplete: (CouchDocument*)userDoc {
+//    make session active before deleting doc
+    NSMutableDictionary* props = [[userDoc properties] mutableCopy];
+    [props setObject:[NSNumber numberWithBool:YES] forKey:@"_deleted"];
+    [[userDoc currentRevision] putProperties: props];
+}
 
-// Starts an async bidirectional sync of the _session in the _localControlDatabase.
-- (void) activateSession {
-    LogTo(Syncpoint, @"Activating session document...");
+- (void) waitForPairingToComplete: (CouchDocument*)userDoc {
+    MYAfterDelay(5.0, ^{
+        RESTOperation* op = [userDoc GET];
+        [op onCompletion:^{
+            NSDictionary* resp = $castIf(NSDictionary, op.responseBody.fromJSON);
+            NSString* state = [resp objectForKey:@"state"];
+            if ([state isEqualToString:@"paired"]) {
+                [self pairingDidComplete: userDoc];
+            } else {
+                [self waitForPairingToComplete: userDoc];                
+            }
+        }];
+        [op start];
+    });
+}
+
+- (void) savePairingUserToRemote {
+    CouchServer* anonRemote = [[CouchServer alloc] initWithURL: _remote];
+    RESTResource* remoteSession = [[RESTResource alloc] initWithParent: anonRemote relativePath: @"_session"];
+    RESTOperation* op = [remoteSession GET];
+    [op onCompletion: ^{
+        NSDictionary* resp = $castIf(NSDictionary, op.responseBody.fromJSON);
+        NSString* userDbName = [[resp objectForKey:@"info"] objectForKey:@"authentication_db"];
+        CouchDatabase* anonUserDb = [anonRemote databaseNamed:userDbName];
+        NSDictionary* userProps = [_session pairingUserProperties];
+        CouchDocument* newUserDoc = [anonUserDb documentWithID:[userProps objectForKey:@"_id"]];
+        RESTOperation* docPut = [newUserDoc putProperties:userProps];
+        [docPut onCompletion:^{
+            NSString* remoteURLString = [[_remote absoluteString] 
+                                         stringByReplacingOccurrencesOfString:@"://" 
+                                         withString:$sprintf(@"://%@:%@@", 
+                                                             [_session.pairing_creds objectForKey:@"username"], 
+                                                             [_session.pairing_creds objectForKey:@"password"])];
+            CouchServer* userRemote = [[CouchServer alloc] initWithURL: [NSURL URLWithString:remoteURLString]];
+            CouchDatabase* userUserDb = [userRemote databaseNamed:userDbName];
+            CouchDocument* readUserDoc = [userUserDb documentWithID: [newUserDoc documentID]];
+            [self waitForPairingToComplete: readUserDoc];
+        }];
+    }];
+    [op start];
+}
+
+- (void) pairSession {
+    LogTo(Syncpoint, @"Pairing session...");
     Assert(!_session.isActive);
     [_session clearState: nil];
     self.state = kSyncpointActivating;
-    NSString* sessionID = _session.document.documentID;
-    [self pushControlDataToDatabaseNamed: kRemoteHandshakeDatabaseName];
-    _controlPull = [self pullControlDataFromDatabaseNamed: kRemoteHandshakeDatabaseName];
-    _controlPull.filter = @"_doc_ids";
-    _controlPull.filterParams = $dict({@"doc_ids", $sprintf(@"[\"%@\"]", sessionID)});
-    _controlPull.continuous = YES;
-    
-    //    ok now we should listen to changes on the control db and stop replication 
-    //    when we get our doc back in a finalized state
-    [self observeControlDatabase];
+    [self savePairingUserToRemote];
 }
 
 
