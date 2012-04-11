@@ -153,8 +153,9 @@ static NSEnumerator* modelsOfType(CouchDatabase* database, NSString* type) {
                  {@"type", @"user"},
                  {@"sp_oauth",self.oauth_creds},
                  {@"state", @"new"},
-                 {@"pairing-type",[self getValueOfProperty:@"type"]},
-                 {@"pairing-token",[self getValueOfProperty:@"session_token"]},
+                 {@"pairing_type",[self getValueOfProperty:@"type"]},
+                 {@"pairing_token",[self getValueOfProperty:@"session_token"]},
+                 {@"pairing_app_id",[self getValueOfProperty:@"app_id"]},
                  {@"roles", [NSArray array]},
                  {@"password", password});
 }
